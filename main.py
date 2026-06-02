@@ -27,14 +27,29 @@ def get_all_products():
 
 @app.get("/products/{id}")
 def get_products_by_id(id:int):
+        result = [
+
+        ]
         for i in product:
                 if i.id == id:
-                        return i
+                        result.append(i)  
+        if result:
+                return result
         return "product not found"
 
-@app.post("/products")
+@app.post("/addproducts")
 
-def add_product(new_product:Products):
+def add_product(new_product:Products):#Products is class in models.py
         product.append(new_product)
         return new_product
 
+
+@app.put("/product")
+def update_product(id:int,updated_product: Products):
+        for i in range(len(product)):
+                if product[i].id == id:
+                        product[i] = updated_product
+                        return "Product updated successfully"
+                
+        return "Product Not found"
+                
