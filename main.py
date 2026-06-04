@@ -53,3 +53,10 @@ def update_product(id:int,updated_product: Products):
                 
         return "Product Not found"
                 
+@app.delete("/product")
+def delete_products(id:int):
+        for i in range(len(product)):
+                if product[i].id == id:
+                        del product[i]
+                        return "Deletion Successful...."
+        return "oops!! Product not found"
