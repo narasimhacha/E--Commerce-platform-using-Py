@@ -1,7 +1,12 @@
 #We installed web framework as Fast api and web server as uvicorn. We will use Fast api to create a web application and uvicorn to run the application.
 from fastapi import FastAPI
 from models import Products
+from database import session,engine
+import database_models
+
 app = FastAPI()
+
+database_models.Base.metadata.create_all(bind = engine)
 
 @app.get("/")
 
@@ -17,15 +22,15 @@ product = [
         Products(id=2,name="Phone",description="Oppo f23 snap dragon processor",quantity=10,price=20000),
         Products(id=3,name="Headphones",description="Boat headphones with good sound quality",quantity=10,price=2000),
         Products(id=4,name="Charger",description="Mobile Charger",quantity=10,price=200)
-        ]
-
-        
+        ]       
 
 @app.get("/products")
 def get_all_products():
+        db = session()
+        db.query()
         return product
 
-@app.get("/products/{id}")
+@ app.get("/products/{id}")
 def get_products_by_id(id:int):
         result = [
 
