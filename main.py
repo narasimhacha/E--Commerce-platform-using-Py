@@ -1,9 +1,10 @@
 #We installed web framework as Fast api and web server as uvicorn. We will use Fast api to create a web application and uvicorn to run the application.
 from typing import List
-
-from fastapi import FastAPI, HTTPException
+from sqlalchemy.orm import Session
+from fastapi import FastAPI, HTTPException, Depends
 from models import Base, Product, ProductSchema
 from database import engine, session
+import database_models
 
 app = FastAPI()
 
@@ -17,8 +18,9 @@ sample_products = [
 ]
 
 
-def seed_data() -> None:
+def seed_data() :
     db = session()
+    yield db
     try:
         if not db.query(Product).first():
             for item in sample_products:
@@ -37,12 +39,11 @@ def greet():
 
 
 @app.get("/products", response_model=List[ProductSchema])
-def get_all_products():
+def get_all_products(db:Session = Depends(seed_data)):
     db = session()
-    try:
-        return db.query(Product).all()
-    finally:
-        db.close()
+    db_products = db.query(database_models.Products).all()
+    
+    return db_products
 
 @app.get("/products/{product_id}", response_model=ProductSchema)
 def get_product_by_id(product_id: int):

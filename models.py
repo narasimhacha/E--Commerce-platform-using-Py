@@ -2,7 +2,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 #this is for pydantic
-from sqlalchemy import Column, Integer, String, Float
+from sqlalchemy import Column, Integer, String, Float, create_engine
 from sqlalchemy.orm import declarative_base
 from database import engine
 
