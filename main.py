@@ -2,9 +2,9 @@
 from typing import List
 from sqlalchemy.orm import Session
 from fastapi import FastAPI, HTTPException, Depends
-from models import Base, Product, ProductSchema
-from database import engine, session
-import database_models
+from models import Product, ProductSchema
+from database import Base,engine, session
+
 
 app = FastAPI()
 
@@ -41,7 +41,7 @@ def greet():
 @app.get("/products", response_model=List[ProductSchema])
 def get_all_products(db:Session = Depends(seed_data)):
     db = session()
-    db_products = db.query(database_models.Products).all()
+    db_products = db.query(Product).all()
     
     return db_products
 

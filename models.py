@@ -3,10 +3,10 @@ from typing import Optional
 from pydantic import BaseModel
 #this is for pydantic
 from sqlalchemy import Column, Integer, String, Float, create_engine
-from sqlalchemy.orm import declarative_base
-from database import engine
+#from sqlalchemy.orm import declarative_base
+from database import Base,engine
 
-Base = declarative_base()
+#Base = declarative_base()
 
 class Product(Base):
     __tablename__ = "products"
@@ -25,7 +25,8 @@ class ProductSchema(BaseModel):
     quantity: int
     price: float
 
-    class Config:
-        orm_mode = True
+    model_config = {
+    "from_attributes": True
+    }
 
-Base.metadata.create_all(bind=engine)
+#Base.metadata.create_all(bind=engine)
