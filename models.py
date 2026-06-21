@@ -2,7 +2,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 #this is for pydantic
-from sqlalchemy import Column, Integer, String, Float, create_engine
+from sqlalchemy import Column, Integer, String, Float
 #from sqlalchemy.orm import declarative_base
 from database import Base,engine
 
@@ -12,8 +12,8 @@ class Product(Base):
     __tablename__ = "products"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False)
-    description = Column(String, nullable=False)
+    name = Column(String(255), nullable=False)
+    description = Column(String(1000), nullable=False)
     quantity = Column(Integer, nullable=False)
     price = Column(Float, nullable=False)
 
