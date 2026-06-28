@@ -18,12 +18,29 @@ class Product(Base):
     price = Column(Float, nullable=False)
 
 
+class Users(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(100), unique=True, nullable=False)
+    hashed_password = Column(String(255), nullable=False)
+
+
 class ProductSchema(BaseModel):
     id: Optional[int] = None
     name: str
     description: str
     quantity: int
     price: float
+
+    model_config = {
+    "from_attributes": True
+    }
+
+
+class UserSchema(BaseModel):
+    username: str
+    password: str
 
     model_config = {
     "from_attributes": True

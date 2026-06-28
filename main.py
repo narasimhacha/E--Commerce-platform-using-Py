@@ -4,9 +4,10 @@ from sqlalchemy.orm import Session
 from fastapi import FastAPI, HTTPException, Depends
 from models import Product, ProductSchema
 from Database_config.database import Base,engine, session
-
+import auth
 
 app = FastAPI()
+app.include_router(auth.router)
 
 Base.metadata.create_all(bind=engine)
 

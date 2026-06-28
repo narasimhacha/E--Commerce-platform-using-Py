@@ -1,11 +1,11 @@
 from datetime import timedelta, datetime
 from typing import Annotated
-from Fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from starlette import status
-from database import SessionLocal
-from models import Product
+from Database_config.database import session as SessionLocal
+from models import Product, Users
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm , OAuth2PasswordBearer
 from jose import jwt, JWTError
@@ -40,4 +40,9 @@ db_dependency = Annotated[Session, Depends(get_db)]
 @router.post("/",status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency,
                       create_user_request: CreateUserRequest):
-    hashed_password = bcrcypt_context.hash(create_user_request.password)
+    create_user_model = Users(
+        username=create_user_request.username,
+        hashed_password=bcrcypt_context.hash(create_user_request.password),
+    )
+    db.add(create_user_model)
+    db.commit()
