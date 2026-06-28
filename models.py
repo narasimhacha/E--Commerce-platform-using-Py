@@ -4,7 +4,7 @@ from pydantic import BaseModel
 #this is for pydantic
 from sqlalchemy import Column, Integer, String, Float
 #from sqlalchemy.orm import declarative_base
-from database import Base,engine
+from Database_config.database import Base,engine
 
 #Base = declarative_base()
 

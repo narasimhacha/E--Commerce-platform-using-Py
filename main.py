@@ -3,7 +3,7 @@ from typing import List
 from sqlalchemy.orm import Session
 from fastapi import FastAPI, HTTPException, Depends
 from models import Product, ProductSchema
-from database import Base,engine, session
+from Database_config.database import Base,engine, session
 
 
 app = FastAPI()
@@ -100,3 +100,4 @@ def delete_product(product_id: int):
         return {"message": "Deletion successful"}
     finally:
         db.close()
+
