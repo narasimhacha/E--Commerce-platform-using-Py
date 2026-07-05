@@ -1,5 +1,6 @@
 #We installed web framework as Fast api and web server as uvicorn. We will use Fast api to create a web application and uvicorn to run the application.
 from typing import List
+from sqlalchemy import inspect, text
 from sqlalchemy.orm import Session
 from fastapi import FastAPI, HTTPException, Depends
 from models import Product, ProductSchema
@@ -9,6 +10,17 @@ import auth
 app = FastAPI()
 app.include_router(auth.router)
 
+
+def ensure_user_email_column():
+    inspector = inspect(engine)
+    if "users" in inspector.get_table_names():
+        columns = {column["name"] for column in inspector.get_columns("users")}
+        if "email" not in columns:
+            with engine.begin() as connection:
+                connection.execute(text("ALTER TABLE users ADD COLUMN email VARCHAR(255) UNIQUE"))
+
+
+ensure_user_email_column()
 Base.metadata.create_all(bind=engine)
 
 sample_products = [

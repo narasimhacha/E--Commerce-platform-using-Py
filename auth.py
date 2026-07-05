@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from starlette import status
 from Database_config.database import session as SessionLocal
-from models import Product, Users
+from models import Users
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm , OAuth2PasswordBearer
 from jose import jwt, JWTError
@@ -22,6 +22,7 @@ oauth2_beare = OAuth2PasswordBearer(tokenUrl='auth/token')
 
 class CreateUserRequest(BaseModel):
     username : str
+    email:str
     password: str
 
 class Token(BaseModel):
@@ -40,9 +41,28 @@ db_dependency = Annotated[Session, Depends(get_db)]
 @router.post("/",status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency,
                       create_user_request: CreateUserRequest):
+    existing_user = db.query(Users).filter(
+        (Users.username == create_user_request.username) |
+        (Users.email == create_user_request.email)
+    ).first()
+
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username or email already registered"
+        )
+
     create_user_model = Users(
         username=create_user_request.username,
+        email=create_user_request.email,
         hashed_password=bcrcypt_context.hash(create_user_request.password),
     )
     db.add(create_user_model)
     db.commit()
+    db.refresh(create_user_model)
+
+    return {
+        "message": "User created successfully",
+        "username": create_user_model.username,
+        "email": create_user_model.email,
+    }
