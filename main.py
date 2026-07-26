@@ -2,11 +2,11 @@
 from typing import Annotated, List
 from sqlalchemy import inspect, text
 from sqlalchemy.orm import Session
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, status
 from models import Product, ProductSchema
 from Database_config.database import Base,engine, session
 import auth
-from auth import get_current_user
+from auth import get_current_user, db_dependency
 
 app = FastAPI()
 app.include_router(auth.router)
@@ -117,3 +117,9 @@ def delete_product(product_id: int):
         db.close()
 
 user_dependency = Annotated[dict,Depends(get_current_user)]
+
+@app.get("/", status_code=status.HTTP_200_OK)
+async def user(user:None,db:db_dependency):
+    if user is None:
+        raise HTTPException(status_code=401,detail = 'Authentication Failed')
+    return {"User":user}
