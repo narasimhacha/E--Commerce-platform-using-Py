@@ -10,7 +10,7 @@ import auth
 app = FastAPI()
 app.include_router(auth.router)
 
-
+@app.get("/")
 def ensure_user_email_column():
     inspector = inspect(engine)
     if "users" in inspector.get_table_names():

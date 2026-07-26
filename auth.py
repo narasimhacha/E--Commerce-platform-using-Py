@@ -11,14 +11,15 @@ from fastapi.security import OAuth2PasswordRequestForm , OAuth2PasswordBearer
 from jose import jwt, JWTError
 
 router = APIRouter(
-    prefix='/auth',
+    prefix='/auth', 
     tags=['auth']
 )
-SECRET_KEY = 'b8d694ae8a58a9105f0cdadb2fe222b2a7aaba96d56153d6eab3f3cbc3de9926'
-ALGORITHM = 'HS256'
 
 bcrcypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 oauth2_beare = OAuth2PasswordBearer(tokenUrl='auth/token')
+
+SECRET_KEY = "your-secret-key"
+ALGORITHM = "HS256"
 
 class CreateUserRequest(BaseModel):
     username : str
@@ -66,3 +67,30 @@ async def create_user(db: db_dependency,
         "username": create_user_model.username,
         "email": create_user_model.email,
     }
+
+@router.post("/token",response_model=Token)
+async def login_for_access_token(form_data:Annotated[OAuth2PasswordRequestForm, Depends()],
+    db:db_dependency):
+    user = authenticate_user(form_data.username,form_data.password,db)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="couldn't validate the user!!")
+    token = create_access_token(user.username,user.id,timedelta(minutes= 20))
+    return {'access_token':token,'token_type' : 'bearer'}
+        
+def authenticate_user(username:str,password:str,db):
+    user = db.query(Users).filter(Users.username == username).first()
+    if not user:
+        return False
+    if not bcrcypt_context.verify(password,user.hashed_password):
+        return False
+    return user
+
+def create_access_token(
+        username:str,
+        user_id: int,
+        expires_delta = timedelta
+):
+    encode = {'sub' : username,'id':user_id}
+    expires = datetime.utcnow() + expires_delta
+    encode.update({'exp':expires})
+    return jwt.encode(encode,SECRET_KEY,algorithm=ALGORITHM)
