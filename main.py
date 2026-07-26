@@ -1,11 +1,12 @@
 #We installed web framework as Fast api and web server as uvicorn. We will use Fast api to create a web application and uvicorn to run the application.
-from typing import List
+from typing import Annotated, List
 from sqlalchemy import inspect, text
 from sqlalchemy.orm import Session
 from fastapi import FastAPI, HTTPException, Depends
 from models import Product, ProductSchema
 from Database_config.database import Base,engine, session
 import auth
+from auth import get_current_user
 
 app = FastAPI()
 app.include_router(auth.router)
@@ -41,6 +42,7 @@ def seed_data() :
             db.commit()
     finally:
         db.close()
+
 
 
 seed_data()
@@ -114,3 +116,4 @@ def delete_product(product_id: int):
     finally:
         db.close()
 
+user_dependency = Annotated[dict,Depends(get_current_user)]
