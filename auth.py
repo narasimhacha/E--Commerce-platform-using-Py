@@ -10,7 +10,6 @@ from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm , OAuth2PasswordBearer
 from jose import jwt, JWTError
 import os
-import os
 from dotenv import load_dotenv
 
 load_dotenv()
