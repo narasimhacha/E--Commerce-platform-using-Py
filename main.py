@@ -6,7 +6,7 @@ from fastapi import FastAPI, HTTPException, Depends, status
 from models import Product, ProductSchema
 from Database_config.database import Base,engine, session
 import auth
-from auth import get_current_user, db_dependency
+from auth import get_current_user, db_dependency,require_admin
 
 app = FastAPI()
 app.include_router(auth.router)
@@ -83,7 +83,7 @@ def get_product_by_id(product_id: int):
 
 
 @app.post("/products", response_model=ProductSchema)
-def add_product(new_product: ProductSchema):
+def add_product(new_product: ProductSchema, admin : dict = Depends(require_admin)):
     db = session()
     try:
         db_product = Product(**new_product.model_dump(exclude_unset=True))
@@ -96,7 +96,7 @@ def add_product(new_product: ProductSchema):
 
 
 @app.put("/products/{product_id}", response_model=ProductSchema)
-def update_product(product_id: int, updated_product: ProductSchema):
+def update_product(product_id: int, updated_product: ProductSchema,admin:dict = Depends(require_admin)):
     db = session()
     try:
         product = db.query(Product).filter(Product.id == product_id).first()
@@ -114,7 +114,7 @@ def update_product(product_id: int, updated_product: ProductSchema):
 
 
 @app.delete("/products/{product_id}")
-def delete_product(product_id: int):
+def delete_product(product_id: int , admin :dict = Depends(require_admin)):
     db = session()
     try:
         product = db.query(Product).filter(Product.id == product_id).first()
