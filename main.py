@@ -19,9 +19,19 @@ def ensure_user_email_column():
         if "email" not in columns:
             with engine.begin() as connection:
                 connection.execute(text("ALTER TABLE users ADD COLUMN email VARCHAR(255) UNIQUE"))
-
-
+def ensure_user_role_column():
+    inspector = inspect(engine)
+    if "role" in inspector.get_table_names():
+        columns = {column["name"] for column in inspector.get_columns("users")}
+        if "role" not in columns:
+            with engine.begin() as connection: #begin considers the process as a transaction, if there is no error in the process then it commits transaction directly into DB.
+                connection.execute(
+                    text("ALTER TABLE users ADD COLUMN role VARCHAR(50) NOT NULL DEFAULT 'user'")
+                )
+ensure_user_role_column()
 ensure_user_email_column()
+
+
 Base.metadata.create_all(bind=engine)
 
 sample_products = [
