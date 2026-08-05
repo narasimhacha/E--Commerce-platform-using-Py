@@ -1,5 +1,5 @@
 from typing import Optional
-
+from fastapi import HTTPException, status
 from pydantic import BaseModel
 #this is for pydantic
 from sqlalchemy import Column, Integer, String, Float
@@ -25,6 +25,7 @@ class Users(Base):
     username = Column(String(100), unique=True, nullable=False)
     email = Column(String(255), unique=True, nullable=False)
     hashed_password = Column(String(255), nullable=False)
+    role = Column(String(50),nullable=False,default="user")
 
 
 class ProductSchema(BaseModel):
