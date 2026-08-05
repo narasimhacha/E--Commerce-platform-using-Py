@@ -136,3 +136,11 @@ async def get_current_user(token:Annotated[str,Depends(oauth2_beare)]):
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="couldn't validate user!.")
+
+def require_admin(current_user: Annotated[dict , Depends(get_current_user)]):
+    if current_user.get('role') != 'admin':
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only Admins can use this..."
+        )
+    return current_user        
