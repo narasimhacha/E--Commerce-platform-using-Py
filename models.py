@@ -25,7 +25,7 @@ class Users(Base):
     username = Column(String(100), unique=True, nullable=False)
     email = Column(String(255), unique=True, nullable=False)
     hashed_password = Column(String(255), nullable=False)
-    role = Column(String(50),nullable=False,default="user")
+    role = Column(String(50),nullable=True,default="user")
 
 
 class ProductSchema(BaseModel):
