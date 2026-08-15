@@ -27,6 +27,13 @@ class Users(Base):
     hashed_password = Column(String(255), nullable=False)
     role = Column(String(50),nullable=True,default="user")
 
+class Admins(Base):
+    __tablename__ = "admins"
+
+    id = Column(Integer,primary_key=True,nullable=False)
+    username = Column(String(255),unique =  True, nullable=False)
+    email = Column(String(255),unique=True,nullable=False)
+    hashed_password = Column(String(255),nullable=False)
 
 class ProductSchema(BaseModel):
     id: Optional[int] = None
@@ -48,5 +55,6 @@ class UserSchema(BaseModel):
     model_config = {
     "from_attributes": True
     }
+class
 
 #Base.metadata.create_all(bind=engine)
