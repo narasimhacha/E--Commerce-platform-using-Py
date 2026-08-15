@@ -11,8 +11,10 @@ from fastapi.security import OAuth2PasswordRequestForm , OAuth2PasswordBearer
 from jose import jwt, JWTError
 import os
 from dotenv import load_dotenv
+from models import Users,Admins
 
 load_dotenv()
+ADMIN_SECRET_KEY = os.getenv("ADMIN_SECRET_KEY")
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
@@ -81,6 +83,46 @@ async def login_for_access_token(form_data:Annotated[OAuth2PasswordRequestForm, 
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="couldn't validate the user!!")
     token = create_access_token(user.username,user.id,user.role,timedelta(minutes= 20))
     return {'access_token':token,'token_type' : 'bearer'}
+class CreateAdminRequest(BaseModel):
+    username : str
+    email : str
+    password : str
+    admin_key : str
+@router.post("/register-admin", status_code = status.HTTP_201_CREATED)
+async def create_admin(db:db_dependency, create_admin_request: CreateAdminRequest):
+    if not ADMIN_SECRET_KEY or create_admin_request.admin_key != ADMIN_SECRET_KEY:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Invalid admin key"
+        )
+    existing_user = db.query(Users).filter(
+        (Users.username == create_admin_request.username)|
+        (Users.email == create_admin_request.email)   
+    ).first()
+    existing_admin = db.query(Admins).filter(
+        (Admins.username == create_admin_request.username) |
+        (Admins.email == create_admin_request.email)
+    ).first()
+    if existing_user or existing_admin:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail = "Username or email already exists !!"
+        )
+
+    create_admin_model = Admins(
+        username = create_admin_request.username,
+        email = create_admin_request.email,
+        hashed_password = bcrcypt_context.hash(create_admin_request.password)
+    )
+    db.add(create_admin_model)
+    db.commit()
+    db.refresh(create_admin_model)
+    return{
+        "message" : "admin created successfully!!",
+        "username" : create_admin_model.username,
+        "email" : create_admin_model.email
+    }
+
 def create_access_token(
         username:str,
         user_id : int,

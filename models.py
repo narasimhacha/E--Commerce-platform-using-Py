@@ -55,6 +55,14 @@ class UserSchema(BaseModel):
     model_config = {
     "from_attributes": True
     }
-class
+class AdminSchema(BaseModel):
+    username:str
+    email: str
+    password : str
+    admin_key : str
+
+    model_config = {
+        "from_attributes" : True
+    } 
 
 #Base.metadata.create_all(bind=engine)
