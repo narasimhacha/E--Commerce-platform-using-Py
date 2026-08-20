@@ -7,6 +7,7 @@ from models import Product, ProductSchema
 from Database_config.database import Base,engine, session
 import auth
 from auth import get_current_user, db_dependency,require_admin
+from models import Admins
 
 app = FastAPI()
 app.include_router(auth.router)
