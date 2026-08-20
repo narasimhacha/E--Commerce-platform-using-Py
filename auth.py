@@ -147,13 +147,13 @@ async def get_current_user(token:Annotated[str,Depends(oauth2_beare)]):
         
 def authenticate_user(username:str,password:str,db):
     user = db.query(Users).filter(Users.username == username).first()
-    if not user:
-        return False
-    if not bcrcypt_context.verify(password,user.hashed_password):
-        return False
-    return user
+    if user and bcrcypt_context.verify(password, user.hashed_password):
+        return user
 
-
+    admin = db.query(Admins).filter(Admins.username == username).first()
+    if admin and bcrcypt_context.verify(password,admin.hashed_password):
+        return admin
+    return False
 
 
 def require_admin(current_user: Annotated[dict , Depends(get_current_user)]):

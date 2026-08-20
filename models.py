@@ -34,7 +34,7 @@ class Admins(Base):
     username = Column(String(255),unique =  True, nullable=False)
     email = Column(String(255),unique=True,nullable=False)
     hashed_password = Column(String(255),nullable=False)
-
+    role = Column(String(50), nullable = False, default ="admin" )
 class ProductSchema(BaseModel):
     id: Optional[int] = None
     name: str
