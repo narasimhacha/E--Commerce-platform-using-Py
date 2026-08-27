@@ -8,9 +8,11 @@ from Database_config.database import Base,engine, session
 import auth
 from auth import get_current_user, db_dependency,require_admin
 from models import Admins
+import cart
 
 app = FastAPI()
 app.include_router(auth.router)
+app.include_router(cart.router)
 
 @app.get("/")
 def ensure_user_email_column():
