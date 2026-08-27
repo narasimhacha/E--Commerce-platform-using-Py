@@ -77,5 +77,22 @@ class AdminSchema(BaseModel):
         "from_attributes" : True
     } 
 
+class CartItemCreate(BaseModel):
+    product_id : int
+    quantity: int = 1
+
+class CartItemUpdate(BaseModel):
+    quantity: int
+
+class CartItemSchema(BaseModel):
+    id: int
+    product_id:int
+    quantity:int
+    product: ProductSchema
+
+model_config = {
+    "from_attributes" : True
+}
+
 #Base.metadata.create_all(bind=engine)
 ###check admin features and roles 
