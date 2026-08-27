@@ -5,6 +5,8 @@ from pydantic import BaseModel
 from sqlalchemy import Column, Integer, String, Float
 #from sqlalchemy.orm import declarative_base
 from Database_config.database import Base,engine
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship
 
 #Base = declarative_base()
 
@@ -35,6 +37,16 @@ class Admins(Base):
     email = Column(String(255),unique=True,nullable=False)
     hashed_password = Column(String(255),nullable=False)
     role = Column(String(50), nullable = False, default ="admin" )
+
+class cartItem(Base):
+    __tablename__ = "cart_items"
+    id = Column(Integer,primary_key=True,index=True)
+    user_id = Column(Integer,ForeignKey("users.id"),nullable=False)
+    product_id = Column(Integer,ForeignKey("products.id"),nullable=False)
+    quantity = Column(Integer,nullable=False,default=1)
+
+    product = relationship("Product")
+
 class ProductSchema(BaseModel):
     id: Optional[int] = None
     name: str
