@@ -22,6 +22,7 @@ def ensure_user_email_column():
         if "email" not in columns:
             with engine.begin() as connection:
                 connection.execute(text("ALTER TABLE users ADD COLUMN email VARCHAR(255) UNIQUE"))
+
 def ensure_user_role_column():
     inspector = inspect(engine)
     if "role" in inspector.get_table_names():
