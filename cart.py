@@ -83,3 +83,18 @@ def clear_cart(user: user_dependency, db:db_dependency):
     db.query(cartItem).filter(cartItem.user_id == user['id']).delete()
     db.commit()
     return {"message":"cart cleared"}
+
+@router.get("/total")
+def cart_total(user:user_dependency, db:db_dependency):
+    cart_item = db.query(cartItem).filter(cartItem.user_id == user['id']).all()
+
+    if not cart_item:
+        return {"total":0, "item_count": 0}
+
+    total = sum(item.product.price * item.quantity for item in cart_item)
+
+    return{
+        "total" : round(total,2),
+        "item_count" : len(cart_item)
+
+    }

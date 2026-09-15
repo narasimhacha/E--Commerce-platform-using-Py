@@ -90,9 +90,9 @@ class CartItemSchema(BaseModel):
     quantity:int
     product: ProductSchema
 
-model_config = {
-    "from_attributes" : True
-}
+    model_config = {
+        "from_attributes" : True
+    }
 
 #Base.metadata.create_all(bind=engine)
 ###check admin features and roles 
