@@ -3,12 +3,12 @@ from typing import Annotated, List
 from sqlalchemy import inspect, text
 from sqlalchemy.orm import Session
 from fastapi import FastAPI, HTTPException, Depends, status
-from models import Product, ProductSchema
-from Database_config.database import Base,engine, session
-import auth
-from auth import get_current_user, db_dependency,require_admin
-from models import Admins
-import cart
+from app.models import Product, ProductSchema
+from app.database import Base,engine, session
+import routers.auth as auth
+from routers.auth import get_current_user, db_dependency,require_admin
+from app.models import Admins
+import routers.cart as cart
 
 app = FastAPI()
 app.include_router(auth.router)

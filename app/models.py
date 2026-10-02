@@ -4,7 +4,7 @@ from pydantic import BaseModel
 #this is for pydantic
 from sqlalchemy import Column, Integer, String, Float
 #from sqlalchemy.orm import declarative_base
-from Database_config.database import Base,engine
+from app.database import Base,engine
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 

@@ -1,8 +1,8 @@
 # start implementing Cart feature
 from typing import Annotated,List
 from fastapi import APIRouter , Depends, HTTPException, status
-from auth import get_current_user,db_dependency
-from models import cartItem,Product,CartItemCreate,CartItemUpdate,CartItemSchema
+from routers.auth import get_current_user,db_dependency
+from app.models import cartItem,Product,CartItemCreate,CartItemUpdate,CartItemSchema
 
 router = APIRouter(
     prefix='/cart',

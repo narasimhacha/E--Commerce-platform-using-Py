@@ -4,14 +4,14 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from starlette import status
-from Database_config.database import session as SessionLocal
-from models import Users
+from app.database import session as SessionLocal
+from app.models import Users
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm , OAuth2PasswordBearer
 from jose import jwt, JWTError
 import os
 from dotenv import load_dotenv
-from models import Users,Admins
+from app.models import Users,Admins
 
 load_dotenv()
 ADMIN_SECRET_KEY = os.getenv("ADMIN_SECRET_KEY")
