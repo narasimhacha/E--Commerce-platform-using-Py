@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+pydantic
+python-dotenv
+passlib[bcrypt]
+python-jose[cryptography]
+python-multipart
+
+# Optional: if your DATABASE_URL uses PostgreSQL
+# psycopg2-binary
