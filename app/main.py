@@ -9,12 +9,14 @@ import routers.auth as auth
 from routers.auth import get_current_user, db_dependency,require_admin
 from app.models import Admins
 import routers.cart as cart
+from routers import ai_service
+
 
 app = FastAPI()
 app.include_router(auth.router)
 app.include_router(cart.router)
+app.include_router(ai_service.router)
 
-@app.get("/")
 def ensure_user_email_column():
     inspector = inspect(engine)
     if "users" in inspector.get_table_names():
@@ -23,15 +25,18 @@ def ensure_user_email_column():
             with engine.begin() as connection:
                 connection.execute(text("ALTER TABLE users ADD COLUMN email VARCHAR(255) UNIQUE"))
 
+
 def ensure_user_role_column():
     inspector = inspect(engine)
-    if "role" in inspector.get_table_names():
+    if "users" in inspector.get_table_names():
         columns = {column["name"] for column in inspector.get_columns("users")}
         if "role" not in columns:
-            with engine.begin() as connection: #begin considers the process as a transaction, if there is no error in the process then it commits transaction directly into DB.
+            with engine.begin() as connection:
                 connection.execute(
                     text("ALTER TABLE users ADD COLUMN role VARCHAR(50) NOT NULL DEFAULT 'user'")
                 )
+
+
 ensure_user_role_column()
 ensure_user_email_column()
 
@@ -132,7 +137,7 @@ def delete_product(product_id: int , admin :dict = Depends(require_admin)):
 
 user_dependency = Annotated[dict,Depends(get_current_user)]
 
-@app.get("/", status_code=status.HTTP_200_OK)
+@app.get("/user", status_code=status.HTTP_200_OK)
 async def user(user:user_dependency,db:db_dependency):
     if user is None:
         raise HTTPException(status_code=401,detail = 'Authentication Failed')

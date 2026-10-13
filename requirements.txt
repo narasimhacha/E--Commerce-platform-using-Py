@@ -6,6 +6,8 @@ python-dotenv
 passlib[bcrypt]
 python-jose[cryptography]
 python-multipart
+httpx
+google-genai
 
 # Optional: if your DATABASE_URL uses PostgreSQL
 # psycopg2-binary
