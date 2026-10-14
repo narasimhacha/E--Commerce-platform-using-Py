@@ -10,12 +10,14 @@ from routers.auth import get_current_user, db_dependency,require_admin
 from app.models import Admins
 import routers.cart as cart
 from routers import ai_service
+from routers import ai 
 
 
 app = FastAPI()
 app.include_router(auth.router)
 app.include_router(cart.router)
 app.include_router(ai_service.router)
+app.include_router(ai.router)
 
 def ensure_user_email_column():
     inspector = inspect(engine)
