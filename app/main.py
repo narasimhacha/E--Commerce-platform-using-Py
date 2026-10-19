@@ -125,18 +125,32 @@ def update_product(product_id: int, updated_product: ProductSchema,admin:dict = 
 
 
 @app.delete("/products/{product_id}")
-def delete_product(product_id: int , admin :dict = Depends(require_admin)):
+def delete_product(product_id: int, admin: dict = Depends(require_admin)):
     db = session()
     try:
         product = db.query(Product).filter(Product.id == product_id).first()
         if not product:
             raise HTTPException(status_code=404, detail="Product not found")
+
+        # 1. delete the product
         db.delete(product)
+        db.flush()
+
+        # 2. move all later ids forward (6 -> 5, 7 -> 6, ...)
+        db.execute(
+            text("UPDATE products SET id = id - 1 WHERE id > :pid ORDER BY id"),
+            {"pid": product_id},
+        )
         db.commit()
+
+        # 3. reset auto-increment so the next insert gets max id + 1
+        next_id = db.execute(text("SELECT COALESCE(MAX(id), 0) + 1 FROM products")).scalar()
+        db.execute(text(f"ALTER TABLE products AUTO_INCREMENT = {int(next_id)}"))
+        db.commit()
+
         return {"message": "Deletion successful"}
     finally:
         db.close()
-
 user_dependency = Annotated[dict,Depends(get_current_user)]
 
 @app.get("/user", status_code=status.HTTP_200_OK)
