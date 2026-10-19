@@ -17,7 +17,7 @@ app = FastAPI()
 app.include_router(auth.router)
 app.include_router(cart.router)
 app.include_router(ai.router)
-app.include_router(ai.router)
+
 
 def ensure_user_email_column():
     inspector = inspect(engine)
