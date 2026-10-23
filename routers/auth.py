@@ -1,4 +1,4 @@
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, timezone
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -6,12 +6,12 @@ from sqlalchemy.orm import Session
 from starlette import status
 from app.database import session as SessionLocal
 from app.models import Users
-from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm , OAuth2PasswordBearer
 from jose import jwt, JWTError
 import os
 from dotenv import load_dotenv
 from app.models import Users,Admins
+import bcrypt
 
 load_dotenv()
 ADMIN_SECRET_KEY = os.getenv("ADMIN_SECRET_KEY")
@@ -24,7 +24,13 @@ router = APIRouter(
     tags=['auth']
 )
 
-bcrcypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
+
+
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode()[:72], bcrypt.gensalt()).decode()
+
+def verify_password(password: str, hashed: str) -> bool:
+    return bcrypt.checkpw(password.encode()[:72], hashed.encode())
 oauth2_beare = OAuth2PasswordBearer(tokenUrl='auth/token')
 
 class CreateUserRequest(BaseModel):
@@ -62,7 +68,7 @@ async def create_user(db: db_dependency,
     create_user_model = Users(
         username=create_user_request.username,
         email=create_user_request.email,
-        hashed_password=bcrcypt_context.hash(create_user_request.password),
+        hashed_password=hash_password(create_user_request.password),
         role = "user",
     )
     db.add(create_user_model)
@@ -112,7 +118,7 @@ async def create_admin(db:db_dependency, create_admin_request: CreateAdminReques
     create_admin_model = Admins(
         username = create_admin_request.username,
         email = create_admin_request.email,
-        hashed_password = bcrcypt_context.hash(create_admin_request.password)
+        hashed_password = hash_password(create_admin_request.password)
     )
     db.add(create_admin_model)
     db.commit()
@@ -130,7 +136,7 @@ def create_access_token(
         expires_delta:timedelta
 ):
     encode = {'sub':username,'id':user_id,'role':role}
-    expires = datetime.utcnow() + expires_delta
+    expires = datetime.now(timezone.utc) + expires_delta
     encode.update({'exp':expires})
     return jwt.encode(encode,SECRET_KEY,algorithm=ALGORITHM)
 async def get_current_user(token:Annotated[str,Depends(oauth2_beare)]):
@@ -147,11 +153,11 @@ async def get_current_user(token:Annotated[str,Depends(oauth2_beare)]):
         
 def authenticate_user(username:str,password:str,db):
     user = db.query(Users).filter(Users.username == username).first()
-    if user and bcrcypt_context.verify(password, user.hashed_password):
+    if user and verify_password(password, user.hashed_password):
         return user
 
     admin = db.query(Admins).filter(Admins.username == username).first()
-    if admin and bcrcypt_context.verify(password,admin.hashed_password):
+    if admin and verify_password(password, admin.hashed_password):
         return admin
     return False
 
