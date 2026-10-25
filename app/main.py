@@ -53,11 +53,26 @@ ensure_user_email_column()
 
 Base.metadata.create_all(bind=engine)
 
+def ensure_product_image_column():
+    inspector = inspect(engine)
+    if "products" in inspector.get_table_names():
+        columns = {column["name"] for column in inspector.get_columns("products")}
+        if "image_url" not in columns:
+            with engine.begin() as connection:
+                connection.execute(text("ALTER TABLE products ADD COLUMN image_url VARCHAR(1000)"))
+
+
+ensure_product_image_column()
+
 sample_products = [
-    {"id": 1, "name": "Laptops", "description": "ACER laptop Ryzen processor", "quantity": 10, "price": 50000.0},
-    {"id": 2, "name": "Phone", "description": "Oppo f23 snap dragon processor", "quantity": 10, "price": 20000.0},
-    {"id": 3, "name": "Headphones", "description": "Boat headphones with good sound quality", "quantity": 10, "price": 2000.0},
-    {"id": 4, "name": "Charger", "description": "Mobile Charger", "quantity": 10, "price": 200.0},
+    {"id": 1, "name": "Laptops", "description": "ACER laptop Ryzen processor", "quantity": 10, "price": 50000.0,
+     "image_url": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1000&q=80"},
+    {"id": 2, "name": "Phone", "description": "Oppo f23 snap dragon processor", "quantity": 10, "price": 20000.0,
+     "image_url": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1000&q=80"},
+    {"id": 3, "name": "Headphones", "description": "Boat headphones with good sound quality", "quantity": 10, "price": 2000.0,
+     "image_url": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1000&q=80"},
+    {"id": 4, "name": "Charger", "description": "Mobile Charger", "quantity": 10, "price": 200.0,
+     "image_url": "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1000&q=80"},
 ]
 
 
@@ -125,6 +140,7 @@ def update_product(product_id: int, updated_product: ProductSchema,admin:dict = 
         product.description = updated_product.description
         product.quantity = updated_product.quantity
         product.price = updated_product.price
+        product.image_url = updated_product.image_url
         db.commit()
         db.refresh(product)
         return product

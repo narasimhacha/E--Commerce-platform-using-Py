@@ -18,6 +18,7 @@ class Product(Base):
     description = Column(String(1000), nullable=False)
     quantity = Column(Integer, nullable=False)
     price = Column(Float, nullable=False)
+    image_url = Column(String(1000), nullable=True)
 
 
 class Users(Base):
@@ -53,6 +54,7 @@ class ProductSchema(BaseModel):
     description: str
     quantity: int
     price: float
+    image_url: Optional[str] = None
 
     model_config = {
     "from_attributes": True

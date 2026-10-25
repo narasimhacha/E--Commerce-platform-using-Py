@@ -90,6 +90,7 @@ def map_product(product):
         "description": desc[:1000],
         "quantity": int(product.get("stock", 0)),
         "price": float(product.get("price", 0)),
+        "image_url": product.get("thumbnail"),
     }
 
 
