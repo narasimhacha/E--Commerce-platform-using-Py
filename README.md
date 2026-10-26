@@ -107,6 +107,43 @@ All cart routes require a valid JWT and only ever operate on the logged-in user'
 | PUT | `/cart/{item_id}` | Any logged-in user | Change the quantity of an item in your cart. |
 | DELETE | `/cart/{item_id}` | Any logged-in user | Remove an item from your cart. |
 
+### Checkout (`/checkout`)
+
+`POST /checkout` requires a customer JWT and converts the current cart into a pending order. Send only the payment method; prices, stock, tax, and totals are read or calculated by the server. The initial sandbox pricing policy is ₹50 flat shipping, 18% GST on the item subtotal, ₹30 COD fee for COD orders, and no discount. Checkout snapshots product names and prices and does not yet process payment or change stock.
+
+Example request body:
+
+```json
+{
+  "payment_method": "CARD"
+}
+```
+
+### Mock payment sandbox
+
+The cart checkout continues to `/payment/sandbox/{order_id}` in the frontend. The backend sandbox endpoints require the same customer JWT:
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/payment/sandbox/{order_id}` | Read an owned order and its itemized test checkout summary. |
+| POST | `/payment/sandbox/pay?order_id={order_id}` | Simulate payment for the order's selected method. |
+| GET | `/orders/{order_id}` | Read order and payment status (owner or admin). |
+
+Card test values: `4111 1111 1111 1111` succeeds; `4000 0000 0000 0002` declines; `4000 0000 0000 0069` simulates an expired card; `4000 0000 0000 0119` simulates a processing error. Use any cardholder name, a future `MM/YY` expiry, and a 3–4 digit CVV. Online test IDs are `success@test` and `fail@test`; netbanking test banks are SBI, HDFC, ICICI, and Axis. The sandbox banner makes clear that no money is charged.
+
+Payment request bodies include only the fields for the selected method. For example:
+
+```json
+{
+  "card_number": "4111111111111111",
+  "cardholder_name": "Test Customer",
+  "expiry": "12/30",
+  "cvv": "123"
+}
+```
+
+CVV and full card number are never persisted. On successful card/online payment, stock decrement, cart clearing, payment record, and order transition commit together. COD confirms the order without creating a gateway payment record.
+
 ### Recommendations (`/recommendations`)
 
 | Method | Endpoint | Auth required | Description |
@@ -140,11 +177,11 @@ This project uses two layers of access control:
 - `Database_config/database_models.py` is a legacy duplicate of the `Product` model and isn't used anywhere; the actual model lives in `models.py`.
 - There's no automated test suite yet.
 - No pagination or filtering on `GET /products` yet.
-- No order/checkout flow yet — the cart doesn't currently convert into a placed order.
+- Orders and mock payment processing are implemented; replace the `PaymentProvider` implementation before integrating a real gateway.
 
 ## Roadmap
 
-- [ ] Order/checkout flow (cart → order, with stock decrement)
+- [x] Mock payment sandbox and order lookup
 - [ ] Pytest test suite
 - [ ] Pagination and filtering for product listing
 - [ ] Dockerfile + docker-compose for local setup

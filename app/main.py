@@ -9,7 +9,7 @@ import routers.auth as auth
 from routers.auth import get_current_user, db_dependency,require_admin
 from app.models import Admins
 import routers.cart as cart
-from routers import auth, cart, ai
+from routers import auth, cart, ai, checkout, payments
 
 
 
@@ -25,6 +25,8 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(cart.router)
 app.include_router(ai.router)
+app.include_router(checkout.router)
+app.include_router(payments.router)
 
 
 def ensure_user_email_column():

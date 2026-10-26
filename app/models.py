@@ -1,11 +1,11 @@
+import enum
+import uuid
 from typing import Optional
-from fastapi import HTTPException, status
 from pydantic import BaseModel
 #this is for pydantic
-from sqlalchemy import Column, Integer, String, Float
+from sqlalchemy import Column, Integer, String, Float, Numeric, DateTime, Enum as SQLAlchemyEnum, ForeignKey, func
 #from sqlalchemy.orm import declarative_base
 from app.database import Base,engine
-from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 
 #Base = declarative_base()
@@ -47,6 +47,113 @@ class cartItem(Base):
     quantity = Column(Integer,nullable=False,default=1)
 
     product = relationship("Product")
+
+
+class PaymentMethod(str, enum.Enum):
+    CARD = "CARD"
+    ONLINE = "ONLINE"
+    COD = "COD"
+
+
+class OrderStatus(str, enum.Enum):
+    PENDING = "PENDING"
+    PAID = "PAID"
+    FAILED = "FAILED"
+    COD_CONFIRMED = "COD_CONFIRMED"
+    CANCELLED = "CANCELLED"
+
+
+class PaymentStatus(str, enum.Enum):
+    PENDING = "PENDING"
+    SUCCEEDED = "SUCCEEDED"
+    FAILED = "FAILED"
+
+
+def generate_transaction_id() -> str:
+    return f"MOCK-{uuid.uuid4().hex}"
+
+
+class Order(Base):
+    __tablename__ = "orders"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    subtotal = Column(Numeric(12, 2), nullable=False)
+    tax = Column(Numeric(12, 2), nullable=False)
+    shipping_fee = Column(Numeric(12, 2), nullable=False, default=0)
+    cod_fee = Column(Numeric(12, 2), nullable=False, default=0)
+    discount = Column(Numeric(12, 2), nullable=False, default=0)
+    total = Column(Numeric(12, 2), nullable=False)
+    payment_method = Column(
+        SQLAlchemyEnum(
+            PaymentMethod,
+            name="payment_method",
+            native_enum=False,
+            values_callable=lambda members: [member.value for member in members],
+        ),
+        nullable=False,
+    )
+    status = Column(
+        SQLAlchemyEnum(
+            OrderStatus,
+            name="order_status",
+            native_enum=False,
+            values_callable=lambda members: [member.value for member in members],
+        ),
+        nullable=False,
+        default=OrderStatus.PENDING,
+    )
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+    items = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
+    payments = relationship("Payment", back_populates="order", cascade="all, delete-orphan")
+
+
+class OrderItem(Base):
+    __tablename__ = "order_items"
+
+    id = Column(Integer, primary_key=True, index=True)
+    order_id = Column(Integer, ForeignKey("orders.id"), nullable=False, index=True)
+    product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
+    product_name_snapshot = Column(String(255), nullable=False)
+    unit_price_snapshot = Column(Numeric(12, 2), nullable=False)
+    quantity = Column(Integer, nullable=False)
+
+    order = relationship("Order", back_populates="items")
+    product = relationship("Product")
+
+
+class Payment(Base):
+    __tablename__ = "payments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    order_id = Column(Integer, ForeignKey("orders.id"), nullable=False, index=True)
+    method = Column(
+        SQLAlchemyEnum(
+            PaymentMethod,
+            name="payment_method",
+            native_enum=False,
+            values_callable=lambda members: [member.value for member in members],
+        ),
+        nullable=False,
+    )
+    status = Column(
+        SQLAlchemyEnum(
+            PaymentStatus,
+            name="payment_status",
+            native_enum=False,
+            values_callable=lambda members: [member.value for member in members],
+        ),
+        nullable=False,
+    )
+    transaction_id = Column(String(40), nullable=False, unique=True, default=generate_transaction_id)
+    failure_reason = Column(String(255), nullable=True)
+    card_last4 = Column(String(4), nullable=True)
+    card_brand = Column(String(30), nullable=True)
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+    order = relationship("Order", back_populates="payments")
+
 
 class ProductSchema(BaseModel):
     id: Optional[int] = None
